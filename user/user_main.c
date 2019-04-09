@@ -7,46 +7,95 @@
 #include "lwip/raw.h"
 #include "lwip/ip_addr.h"
 #include "lwip/netif.h"
+#include "lwip/ip.h"
+#include "lwip/icmp.h"
 
-#include "netif/espenc.h"
-
+#include "driver/espenc.h"
 #include "driver/uart.h"
 
 static struct raw_pcb *raw_pcb_tcp = NULL;
 static struct raw_pcb *raw_pcb_udp = NULL;
+static struct raw_pcb *raw_pcb_icmp = NULL;
+static struct raw_pcb *raw_pcb_igmp = NULL;
+
+static struct netif *eth_if;
 
 static u8_t ICACHE_FLASH_ATTR
-raw_receiver(void *arg, struct raw_pcb *pcb, struct pbuf *p, ip_addr_t *addr)
+raw_receiver_udp(void *arg, struct raw_pcb *pcb, struct pbuf *p, ip_addr_t *addr)
 {
-	os_printf("WLan IP packet of size %d\n", p->tot_len);
+    os_printf("UDP packet rxed of size %d\n", p->tot_len);
+    u8_t protocol = pcb->protocol;
+    os_printf("Packet rxed of protocol %d\n", protocol);
+	
+
+	return 0;
+}
+
+static u8_t ICACHE_FLASH_ATTR
+raw_receiver_tcp(void *arg, struct raw_pcb *pcb, struct pbuf *p, ip_addr_t *addr)
+{
+    os_printf("TCP packet rxed of size %d\n", p->tot_len);
+    u8_t protocol = pcb->protocol;
+    os_printf("Packet rxed of protocol %d\n", protocol);
+	
+
+	return 0;
+}
+
+static u8_t ICACHE_FLASH_ATTR
+raw_receiver_icmp(void *arg, struct raw_pcb *pcb, struct pbuf *p, ip_addr_t *addr)
+{
+    os_printf("ICMP packet rxed of size %d\n", p->tot_len);
+    u8_t protocol = pcb->protocol;
+    os_printf("Packet rxed of protocol %d\n", protocol);
+
+
+    icmp_input(p, eth_if);
+
+    
+	return 0;
+}
+
+static u8_t ICACHE_FLASH_ATTR
+raw_receiver_igmp(void *arg, struct raw_pcb *pcb, struct pbuf *p, ip_addr_t *addr)
+{
+    os_printf("IGMP packet rxed of size %d\n", p->tot_len);
+    u8_t protocol = pcb->protocol;
+    os_printf("Packet rxed of protocol %d\n", protocol);
+
+    
+
 	return 0;
 }
 
 void ICACHE_FLASH_ATTR 
 init_raw_sockets() 
 {
-    raw_pcb_tcp = raw_new(6);
-	raw_pcb_udp = raw_new(17);
-    if (!raw_pcb_tcp || !raw_pcb_udp) {
+    raw_pcb_tcp = raw_new(IP_PROTO_TCP);
+	raw_pcb_udp = raw_new(IP_PROTO_UDP);
+    raw_pcb_icmp = raw_new(IP_PROTO_ICMP);
+    raw_pcb_igmp = raw_new(IP_PROTO_IGMP);
+
+    if (!raw_pcb_tcp || !raw_pcb_udp || !raw_pcb_icmp || !raw_pcb_igmp) {
 		os_printf("\nFailed to init raw sockets\n");
 	} else {
-        os_printf("\ninitialized raw sockets\n");
+        os_printf("\n\n\n\n\ninitialized raw sockets\n\n\n\n\n");
         raw_bind(raw_pcb_tcp, IP_ADDR_ANY);
 		raw_bind(raw_pcb_udp, IP_ADDR_ANY);
-		raw_recv(raw_pcb_tcp, raw_receiver, NULL);
-		raw_recv(raw_pcb_udp, raw_receiver, NULL);
+        raw_bind(raw_pcb_icmp, IP_ADDR_ANY);
+		raw_bind(raw_pcb_igmp, IP_ADDR_ANY);
+
+		raw_recv(raw_pcb_tcp, raw_receiver_tcp, NULL);
+		raw_recv(raw_pcb_udp, raw_receiver_udp, NULL);
+        raw_recv(raw_pcb_icmp, raw_receiver_icmp, NULL);
+		raw_recv(raw_pcb_igmp, raw_receiver_igmp, NULL);
 	}
 }
 
 void ICACHE_FLASH_ATTR 
 init_enc()
 {
-    uint8_t mac_address[] = {0x98, 0xB6, 0xE9, 0x98, 0x8B, 0xAD};
-    //uint8_t *arr_pointer = os_malloc(6); //0x98, 0xB6, 0xE9, 0x98, 0x8B, 0xAD
-    //os_memcpy(arr_pointer, &mac_address, 6);
-    struct netif* new_netif;
-    //new_netif = 
-    espenc_init(NULL, NULL, NULL, NULL, true);
+    eth_if = espenc_init();
 }
 
 void ICACHE_FLASH_ATTR user_init()

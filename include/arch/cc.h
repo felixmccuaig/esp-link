@@ -79,8 +79,8 @@ typedef unsigned long   mem_ptr_t;
 #define LWIP_PLATFORM_DIAG(x) os_printf x
 #define LWIP_PLATFORM_ASSERT(x) ETS_ASSERT(x)
 #else
-#define LWIP_PLATFORM_DIAG(x)
-#define LWIP_PLATFORM_ASSERT(x)
+#define LWIP_PLATFORM_DIAG(x) os_printf x
+#define LWIP_PLATFORM_ASSERT(x) os_printf x
 #endif
 
 #define SYS_ARCH_DECL_PROTECT(x)

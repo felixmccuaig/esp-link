@@ -112,31 +112,31 @@ icmp_input(struct pbuf *p, struct netif *inp)
 #if !LWIP_MULTICAST_PING
       /* multicast destination address? */
       if (ip_addr_ismulticast(&current_iphdr_dest)) {
-        accepted = 1;
+        accepted = 0;
       }
 #endif /* LWIP_MULTICAST_PING */
 #if !LWIP_BROADCAST_PING
       /* broadcast destination address? */
       if (ip_addr_isbroadcast(&current_iphdr_dest, inp)) {
-        accepted = 1;
+        accepted = 0;
       }
 #endif /* LWIP_BROADCAST_PING */
       /* broadcast or multicast destination address not acceptd? */
       if (!accepted) {
-        os_printf("icmp_input: Not echoing to multicast or broadcast pings\n");
+        LWIP_DEBUGF(ICMP_DEBUG, ("icmp_input: Not echoing to multicast or broadcast pings\n"));
         ICMP_STATS_INC(icmp.err);
         pbuf_free(p);
         return;
       }
     }
 #endif /* !LWIP_MULTICAST_PING || !LWIP_BROADCAST_PING */
-    os_printf("icmp_input: ping\n");
+    LWIP_DEBUGF(ICMP_DEBUG, ("icmp_input: ping\n"));
     if (p->tot_len < sizeof(struct icmp_echo_hdr)) {
-      os_printf("icmp_input: bad ICMP echo received\n");
+      LWIP_DEBUGF(ICMP_DEBUG, ("icmp_input: bad ICMP echo received\n"));
       goto lenerr;
     }
     if (inet_chksum_pbuf(p) != 0) {
-      os_printf("icmp_input: checksum failed for received ICMP echo\n");
+      LWIP_DEBUGF(ICMP_DEBUG, ("icmp_input: checksum failed for received ICMP echo\n"));
       pbuf_free(p);
       ICMP_STATS_INC(icmp.chkerr);
       snmp_inc_icmpinerrors();
@@ -150,13 +150,13 @@ icmp_input(struct pbuf *p, struct netif *inp)
       struct pbuf *r;
       /* switch p->payload to ip header */
       if (pbuf_header(p, hlen)) {
-        os_printf("icmp_input: moving p->payload to ip header failed\n", 0);
+        LWIP_ASSERT("icmp_input: moving p->payload to ip header failed\n", 0);
         goto memerr;
       }
       /* allocate new packet buffer with space for link headers */
       r = pbuf_alloc(PBUF_LINK, p->tot_len, PBUF_RAM);
       if (r == NULL) {
-        os_printf("icmp_input: allocating new pbuf failed\n");
+        LWIP_DEBUGF(ICMP_DEBUG, ("icmp_input: allocating new pbuf failed\n"));
         goto memerr;
       }
       LWIP_ASSERT("check that first pbuf can hold struct the ICMP header",

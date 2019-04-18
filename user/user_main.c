@@ -13,6 +13,14 @@
 #include "driver/espenc.h"
 #include "driver/uart.h"
 
+#define USER_PROCTASKPRIO   0
+#define USER_PROCTASK_QLEN  2
+#define MAX_CMD_TOKENS      3
+
+os_event_t  user_proctask_queue[USER_PROCTASK_QLEN];
+
+static void user_proctask(os_event_t *events);
+
 static struct raw_pcb *raw_pcb_tcp = NULL;
 static struct raw_pcb *raw_pcb_udp = NULL;
 static struct raw_pcb *raw_pcb_icmp = NULL;
@@ -98,10 +106,52 @@ init_enc()
     eth_if = espenc_init();
 }
 
+static void ICACHE_FLASH_ATTR user_proctask(os_event_t *events)
+{
+    switch(events->sig) {
+        case SIG_CONSOLE_RX:
+            Uart_rx_buff_enq();
+
+            uint8 uart_buf[128]={0};
+            uint16 len = 0;
+            len = rx_buff_deq(uart_buf, 128 );
+            tx_buff_enq(uart_buf,len);
+
+            char *target = os_malloc(len); 
+            os_memcpy(target, uart_buf, len);
+            char *tokens[3];
+            char *tok = target;
+            int i = 0;
+
+            while ((tok = strtok(tok, " ")) != NULL)
+            {
+                tokens[i] = tok;
+                i++;
+                tok = NULL;
+            }
+
+            if(tokens[0] == NULL) {
+                return;
+            }
+
+            if(strcmp(tokens[0], "init_enc") == 0) {
+                init_enc();
+            } else {
+                tx_buff_enq("unrecognized command", 20);
+            }
+        break;
+        case SIG_DO_NOTHING:
+            log("INFO", "Signal received to do nothing");
+        break;
+    }
+
+}
+
 void ICACHE_FLASH_ATTR user_init()
 {
-    uart_div_modify(UART0, UART_CLK_FREQ / BIT_RATE_9600);
-    os_delay_us(65535);
-    init_raw_sockets();
-    init_enc();
+    uart_init(BIT_RATE_115200, BIT_RATE_115200);
+
+    //init_raw_sockets();
+
+    system_os_task(user_proctask, USER_PROCTASKPRIO, user_proctask_queue, USER_PROCTASK_QLEN);
 }

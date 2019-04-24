@@ -17,7 +17,7 @@ BUILD_BASE	= build
 FW_BASE		= firmware
 
 # base directory of the ESP8266 SDK package, absolute
-SDK_BASE	?= /home/felixmccuaig/esp-open-sdk/sdk
+SDK_BASE	?= /home/felixmccuaig/esp/esp-open-sdk/sdk
 
 # esptool.py path and port
 ESPTOOL		?= esptool.py
@@ -134,7 +134,7 @@ $(FW_BASE):
 
 #WRITE BOTH FW FILES TO ESP
 flash: $(FW_FILE_1) $(FW_FILE_2)
-	$(ESPTOOL) --baud 115200 --port $(ESPPORT) write_flash $(FW_FILE_1_ADDR) $(FW_FILE_1) $(FW_FILE_2_ADDR) $(FW_FILE_2)
+	$(ESPTOOL) --baud 1152000 --port $(ESPPORT) write_flash $(FW_FILE_1_ADDR) $(FW_FILE_1) $(FW_FILE_2_ADDR) $(FW_FILE_2)
 
 #DELETE BOTH FW_BASE AND BUILD_BASE
 clean:

@@ -76,15 +76,10 @@ typedef unsigned long   mem_ptr_t;
 #define PACK_STRUCT_BEGIN
 #define PACK_STRUCT_END
 
-//#define LWIP_DEBUG
+#define LWIP_DEBUG 1
 
-#ifdef LWIP_DEBUG
-#define LWIP_PLATFORM_DIAG(x) log("DIAG", x)
-#define LWIP_PLATFORM_ASSERT(x) log("ASSERT", x)
-#else
-#define LWIP_PLATFORM_DIAG(x) log("DIAG", x)
-#define LWIP_PLATFORM_ASSERT(x) log("ASSERT", x)
-#endif
+#define LWIP_PLATFORM_DIAG(x, ...) os_printf("DIAG", x, ##__VA_ARGS__)
+#define LWIP_PLATFORM_ASSERT(x, ...) os_printf("ASSERT", x, ##__VA_ARGS__)
 
 #define SYS_ARCH_DECL_PROTECT(x)
 #define SYS_ARCH_PROTECT(x)

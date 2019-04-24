@@ -56,6 +56,8 @@
 #include "lwip/autoip.h"
 #include "netif/etharp.h"
 
+#include "driver/log.h"
+
 #if PPPOE_SUPPORT
 #include "netif/ppp_oe.h"
 #endif /* PPPOE_SUPPORT */

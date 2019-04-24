@@ -13,7 +13,7 @@
  * PING_DEBUG: Enable debugging for PING.
  */
 #ifndef PING_DEBUG
-#define PING_DEBUG     LWIP_DBG_OFF
+#define PING_DEBUG     LWIP_DBG_ON
 #endif
 
 /** ping receive timeout - in milliseconds */

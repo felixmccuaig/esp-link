@@ -1,6 +1,7 @@
 #include <lwip/ip_addr.h>
 #include "driver/espenc.h"
 #include "driver/spi.h"
+#include "driver/log.h"
 #include "gpio.h"
 #include "mem.h"
 
@@ -78,7 +79,7 @@ static void writePhy (uint8_t address, uint16_t data) {
 
 static void readBuf(uint16_t len, uint8_t* data) {
     // force CS pin here, as it requires multiple bytes to be sent
-    //log("INFO", "readBuf()");
+    log("INFO", "readBuf()");
     chipEnable();
     if (len != 0) {
         spi_transaction(HSPI, 8, ENC28J60_READ_BUF_MEM, 0, 0, 0, 0, 0, 0);
@@ -152,7 +153,7 @@ err_t enc28j60_link_output(struct netif *netif, struct pbuf *p) {
 
     SetBank(EIR);
     writeOp(ENC28J60_BIT_FIELD_CLR, EIR, EIR_TXERIF|EIR_TXIF);
-    //log("INFO", "before transmission: %02x", readRegByte(EIR));
+    log("INFO", "before transmission: %02x", readRegByte(EIR));
     SetBank(ECON1);
     writeOp(ENC28J60_BIT_FIELD_SET, ECON1, ECON1_TXRTS);
 
@@ -162,6 +163,7 @@ err_t enc28j60_link_output(struct netif *netif, struct pbuf *p) {
         ;
 
     if (!(eir & EIR_TXERIF) && count < 1000U) {
+        // no error; start new transmission
         log("INFO", "transmission success");
     } else {
         log("INFO", "transmission failed (%d - %02x)", count, eir);
@@ -176,7 +178,7 @@ err_t enc28j60_link_output(struct netif *netif, struct pbuf *p) {
 static uint32_t interrupt_reg = 0;
 
 void enc28j60_handle_packets(void) {
-    //log("INFO", "reading ptr: %04x", NextPacketPtr);
+    log("INFO", "reading ptr: %04x", NextPacketPtr);
     writeReg(ERDPT, NextPacketPtr);
     uint16_t packetLen = 0;
     uint16_t rxStatus = 0;
@@ -188,12 +190,12 @@ void enc28j60_handle_packets(void) {
     // Ignore packet checksum TODO
     packetLen -= 4;
 
-    //log("INFO", "next ptr: %04x", NextPacketPtr);
-    //log("INFO", "packet len: %d (%x)", packetLen, packetLen);
-    //log("INFO", "rx status: %02x", rxStatus);
+    log("INFO", "next ptr: %04x", NextPacketPtr);
+    log("INFO", "packet len: %d (%x)", packetLen, packetLen);
+    log("INFO", "rx status: %02x", rxStatus);
 
     if(rxStatus & 0x80 == 0) {
-        //log("INFO", "Rx FAILED");
+        log("INFO", "RECEIVE FAILED");
     } else {
         uint16_t len = packetLen;
         struct pbuf* p = pbuf_alloc(PBUF_LINK, len, PBUF_RAM);
@@ -205,10 +207,9 @@ void enc28j60_handle_packets(void) {
                 data = q->payload;
                 len = q->len;
 
-                //log("INFO", "reading %d to %x", len, data);
+                log("INFO", "reading %d to %x", len, data);
                 readBuf(len, data);
             }
-            
 
             log("INFO", "packet received, passing to netif->input");
             enc_netif.input(p, &enc_netif);
@@ -230,11 +231,16 @@ void interrupt_handler(void *arg) {
     uint8_t interrupt = readRegByte(EIR);
     uint8_t pktCnt = readRegByte(EPKTCNT);
 
-    //log("INFO", " *** INTERRUPT (%02X / %d) ***", interrupt, pktCnt);
+    log("INFO", " *** INTERRUPT (%02X / %d) ***", interrupt, pktCnt);
 
     if(pktCnt > 0) {
+        log("INFO", "pktCnt > 0");
+
         while(readRegByte(EPKTCNT) > 0)
             enc28j60_handle_packets();
+
+        //SetBank(EIE);
+        //writeOp(ENC28J60_BIT_FIELD_CLR, EIE, EIE_PKTIE);
     }
 
     if(interrupt & EIR_PKTIF) {
@@ -245,6 +251,7 @@ void interrupt_handler(void *arg) {
 
     if(interrupt & EIR_TXIF) {
         log("INFO", "TXIF interrupt");
+
         SetBank(EIR);
         writeOp(ENC28J60_BIT_FIELD_CLR, EIR, EIR_TXIF);
     }
@@ -270,8 +277,9 @@ err_t enc28j60_init(struct netif *netif) {
     GPIO_REG_WRITE(GPIO_STATUS_W1TC_ADDRESS, 1 << ESP_INT);
     gpio_pin_intr_state_set(GPIO_ID_PIN(ESP_INT), GPIO_PIN_INTR_NEGEDGE);
 
-    //log("INFO", "interrupts enabled");
-    //log("INFO", "initializing");
+    log("INFO", "interrupts enabled");
+
+    log("INFO", "initializing");
     netif->linkoutput = enc28j60_link_output;
     netif->name[0] = 'e';
     netif->name[1] = 'n';
@@ -287,14 +295,14 @@ err_t enc28j60_init(struct netif *netif) {
     netif->output = etharp_output;
     netif->flags |= NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP;
 
-    //log("INFO", "initializing hardware");
+    log("INFO", "initializing hardware");
     spi_init(HSPI);
     spi_mode(HSPI, 0, 0);
     writeOp(ENC28J60_SOFT_RESET, 0, ENC28J60_SOFT_RESET);
 
     uint8_t estat;
     while(!(estat = readOp(ENC28J60_READ_CTRL_REG, ESTAT)) & ESTAT_CLKRDY) {
-        //log("INFO", "estat: %02x", estat);
+        log("INFO", "estat: %02x", estat);
         os_delay_us(2000); // errata B7/2
     }
     NextPacketPtr = RXSTART_INIT;
@@ -341,38 +349,26 @@ err_t enc28j60_init(struct netif *netif) {
     return ERR_OK;
 }
 
-struct netif* espenc_init() {
-
+struct netif *espenc_init() {
+ 
     IP4_ADDR(&ipaddr, 0, 0, 0, 0);
 
     struct netif* new_netif = netif_add(&enc_netif, &ipaddr, &ipaddr, &ipaddr, NULL, enc28j60_init,
                                     ethernet_input);
-    //log("INFO", "new_netif: %d", new_netif);
+    log("INFO", "new_netif: %d", new_netif);
 
     if(new_netif == NULL) {
-        log("INFO", "netif failed");
+        // failed?
         return;
     }
 
     struct netif* n = netif_list;
-    if(netif_is_up(n)) {
-        while(n) {
-            log("INFO", "network: %c%c is up with MAC: %x%x%x%x%x%x", n->name[0], n->name[1], 
-            n->hwaddr[0], n->hwaddr[1], n->hwaddr[2], n->hwaddr[3], n->hwaddr[4], n->hwaddr[5]);
-            n = n->next;
-        }
-
-        log("INFO", "etharp: %d", (new_netif->flags & NETIF_FLAG_ETHARP));
-
-        if(dhcp_start(new_netif) == 0) {
-            log("INFO", "dhcp_start(): sucess");
-        } else {
-            log("INFO", "dhcp_start(): error");
-        }
-
-        return new_netif;   
-    } else {
-        log("INFO", "Network failed to init");
-        return NULL;
+    while(n) {
+        log("INFO", "network: %d %d; up: %d", n->name[0], n->name[1], netif_is_up(n));
+        n = n->next;
     }
+
+    log("INFO", "etharp: %d", (new_netif->flags & NETIF_FLAG_ETHARP));
+    log("INFO", "dhcp_start(): %d", dhcp_start(new_netif));
+    return new_netif;
 }

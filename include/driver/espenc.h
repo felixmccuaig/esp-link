@@ -2,11 +2,9 @@
 #include <lwip/dhcp.h>
 #include <netif/etharp.h>
 
-#include "driver/log.h"
-
 err_t enc28j60_link_output(struct netif *netif, struct pbuf *p);
 err_t enc28j60_init(struct netif *netif);
-struct netif* espenc_init();
+struct netif *espenc_init();
 
 #define ESP_CS 15
 #define ESP_INT 5

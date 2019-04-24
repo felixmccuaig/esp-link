@@ -241,12 +241,12 @@ uart0_rx_intr_handler(void *para)
         DBG("f");
         uart_rx_intr_disable(UART0);
         WRITE_PERI_REG(UART_INT_CLR(UART0), UART_RXFIFO_FULL_INT_CLR);
-        system_os_post(uart_recvTaskPrio, SIG_CONSOLE_RX, 0);
+        system_os_post(uart_recvTaskPrio, 0, 0);
     }else if(UART_RXFIFO_TOUT_INT_ST == (READ_PERI_REG(UART_INT_ST(uart_no)) & UART_RXFIFO_TOUT_INT_ST)){
         DBG("t");
         uart_rx_intr_disable(UART0);
         WRITE_PERI_REG(UART_INT_CLR(UART0), UART_RXFIFO_TOUT_INT_CLR);
-        system_os_post(uart_recvTaskPrio, SIG_CONSOLE_RX, 0);
+        system_os_post(uart_recvTaskPrio, 0, 0);
     }else if(UART_TXFIFO_EMPTY_INT_ST == (READ_PERI_REG(UART_INT_ST(uart_no)) & UART_TXFIFO_EMPTY_INT_ST)){
         DBG("e");
 	/* to output uart data from uart buffer directly in empty interrupt handler*/
@@ -293,6 +293,7 @@ uart_recvTask(os_event_t *events)
     if(events->sig == 0){
     #if  UART_BUFF_EN  
         Uart_rx_buff_enq();
+        os_printf("RECEIVED INTERRUPT\n");
     #else
         uint8 fifo_len = (READ_PERI_REG(UART_STATUS(UART0))>>UART_RXFIFO_CNT_S)&UART_RXFIFO_CNT;
         uint8 d_tmp = 0;

@@ -11,13 +11,16 @@
 # - 2014-11-23: Updated for SDK 0.9.3
 # - 2014-12-25: Replaced esptool by esptool.py
 
+
+BUILD_AREA = $(CURDIR)/..
+
 # Output directors to store intermediate compiled files
 # relative to the project directory
 BUILD_BASE	= build
 FW_BASE		= firmware
 
 # base directory of the ESP8266 SDK package, absolute
-SDK_BASE	?= /home/felixmccuaig/esp/esp-open-sdk/sdk
+SDK_BASE	?= /home/felixmccuaig/esp-open-sdk/sdk
 
 # esptool.py path and port
 ESPTOOL		?= esptool.py
@@ -31,16 +34,17 @@ MODULES		= driver user
 EXTRA_INCDIR    = include
 
 # libraries used in this project, mainly provided by the SDK
-LIBS		= c gcc hal pp phy net80211 lwip wpa main
+LIBS		= c gcc hal pp phy net80211 lwip_open_napt wpa main
 
 # compiler flags using during compilation of source files
-CFLAGS		= -Os -g -O2 -Wpointer-arith -Wundef -Werror -Wl,-EL -fno-inline-functions -nostdlib -mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH
+CFLAGS		= -Os -g -O2 -Wpointer-arith -Wundef -Werror -Wl,-EL -fno-inline-functions -nostdlib -mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH -DLWIP_OPEN_SRC
 
 # linker flags used to generate the main object file
-LDFLAGS		= -nostdlib -Wl,--no-check-sections -u call_user_start -Wl,-static
+LDFLAGS		= -nostdlib -Wl,--no-check-sections -u call_user_start -Wl,-static -L.
 
 # linker script used for the above linkier step
-LD_SCRIPT	= eagle.app.v6.ld
+#LD_SCRIPT	= eagle.app.v6.ld
+LD_SCRIPT	= -Trom.ld
 
 # various paths from the SDK used in this project
 SDK_LIBDIR	= lib
@@ -72,7 +76,7 @@ LIBS		:= $(addprefix -l,$(LIBS))
 APP_AR		:= $(addprefix $(BUILD_BASE)/,$(TARGET)_app.a)
 TARGET_OUT	:= $(addprefix $(BUILD_BASE)/,$(TARGET).out)
 
-LD_SCRIPT	:= $(addprefix -T$(SDK_BASE)/$(SDK_LDDIR)/,$(LD_SCRIPT))
+#LD_SCRIPT	:= $(addprefix -T$(SDK_BASE)/$(SDK_LDDIR)/,$(LD_SCRIPT))
 
 INCDIR	:= $(addprefix -I,$(SRC_DIR))
 EXTRA_INCDIR	:= $(addprefix -I,$(EXTRA_INCDIR))
@@ -112,12 +116,12 @@ $(FW_BASE)/%.bin: $(TARGET_OUT) | $(FW_BASE)
 	$(vecho) "FW $(FW_BASE)/"
 	$(Q) $(ESPTOOL) elf2image -o $(FW_BASE)/ $(TARGET_OUT)
 
-#USES LDLIBS AND ACTUALLY COMPILES
+#LINKER
 $(TARGET_OUT): $(APP_AR)
 	$(vecho) "LD $@"
-	$(Q) $(LD) -L$(SDK_LIBDIR) $(LD_SCRIPT) $(LDFLAGS) -Wl,--start-group $(LIBS) $(APP_AR) -Wl,--end-group -o $@
+	$(Q) $(LD) -L$(BUILD_AREA)/esp-open-lwip -L$(SDK_LIBDIR) $(LD_SCRIPT) $(LDFLAGS) -Wl,--start-group $(LIBS) $(APP_AR) -Wl,--end-group -o $@
 	
-#THIS IS CALLED BEFORE TARGET_OUT AS IT IS DEP
+#DOES LIBRARIAN
 $(APP_AR): $(OBJ)
 	$(vecho) "AR $@"
 	$(Q) $(AR) cru $@ $^

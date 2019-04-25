@@ -501,7 +501,15 @@
  * interface, define this to 0.
  */
 #ifndef IP_FORWARD
-#define IP_FORWARD                      0
+#define IP_FORWARD                      1
+#endif
+
+#ifndef IP_ROUTING_TAB
+#define IP_ROUTING_TAB                  1
+#endif
+
+#ifndef IP_NAPT
+#define IP_NAPT                         1
 #endif
 
 /**
@@ -1805,21 +1813,21 @@
  * ETHARP_DEBUG: Enable debugging in etharp.c.
  */
 #ifndef ETHARP_DEBUG
-#define ETHARP_DEBUG                    LWIP_DBG_ON
+#define ETHARP_DEBUG                    LWIP_DBG_OFF
 #endif
 
 /**
  * NETIF_DEBUG: Enable debugging in netif.c.
  */
 #ifndef NETIF_DEBUG
-#define NETIF_DEBUG                     LWIP_DBG_ON
+#define NETIF_DEBUG                     LWIP_DBG_OFF
 #endif
 
 /**
  * PBUF_DEBUG: Enable debugging in pbuf.c.
  */
 #ifndef PBUF_DEBUG
-#define PBUF_DEBUG                      LWIP_DBG_ON
+#define PBUF_DEBUG                      LWIP_DBG_OFF
 #endif
 
 /**
@@ -1847,35 +1855,35 @@
  * ICMP_DEBUG: Enable debugging in icmp.c.
  */
 #ifndef ICMP_DEBUG
-#define ICMP_DEBUG                      LWIP_DBG_ON
+#define ICMP_DEBUG                      LWIP_DBG_OFF
 #endif
 
 /**
  * IGMP_DEBUG: Enable debugging in igmp.c.
  */
 #ifndef IGMP_DEBUG
-#define IGMP_DEBUG                      LWIP_DBG_ON
+#define IGMP_DEBUG                      LWIP_DBG_OFF
 #endif
 
 /**
  * INET_DEBUG: Enable debugging in inet.c.
  */
 #ifndef INET_DEBUG
-#define INET_DEBUG                      LWIP_DBG_ON
+#define INET_DEBUG                      LWIP_DBG_OFF
 #endif
 
 /**
  * IP_DEBUG: Enable debugging for IP.
  */
 #ifndef IP_DEBUG
-#define IP_DEBUG                        LWIP_DBG_ON
+#define IP_DEBUG                        LWIP_DBG_OFF
 #endif
 
 /**
  * IP_REASS_DEBUG: Enable debugging in ip_frag.c for both frag & reass.
  */
 #ifndef IP_REASS_DEBUG
-#define IP_REASS_DEBUG                  LWIP_DBG_ON
+#define IP_REASS_DEBUG                  LWIP_DBG_OFF
 #endif
 
 /**
@@ -1903,35 +1911,35 @@
  * SYS_DEBUG: Enable debugging in sys.c.
  */
 #ifndef SYS_DEBUG
-#define SYS_DEBUG                       LWIP_DBG_ON
+#define SYS_DEBUG                       LWIP_DBG_OFF
 #endif
 
 /**
  * TIMERS_DEBUG: Enable debugging in timers.c.
  */
 #ifndef TIMERS_DEBUG
-#define TIMERS_DEBUG                    LWIP_DBG_ON
+#define TIMERS_DEBUG                    LWIP_DBG_OFF
 #endif
 
 /**
  * TCP_DEBUG: Enable debugging for TCP.
  */
 #ifndef TCP_DEBUG
-#define TCP_DEBUG                       LWIP_DBG_ON
+#define TCP_DEBUG                       LWIP_DBG_OFF
 #endif
 
 /**
  * TCP_INPUT_DEBUG: Enable debugging in tcp_in.c for incoming debug.
  */
 #ifndef TCP_INPUT_DEBUG
-#define TCP_INPUT_DEBUG                 LWIP_DBG_ON
+#define TCP_INPUT_DEBUG                 LWIP_DBG_OFF
 #endif
 
 /**
  * TCP_FR_DEBUG: Enable debugging in tcp_in.c for fast retransmit.
  */
 #ifndef TCP_FR_DEBUG
-#define TCP_FR_DEBUG                    LWIP_DBG_ON
+#define TCP_FR_DEBUG                    LWIP_DBG_OFF
 #endif
 
 /**
@@ -1939,105 +1947,112 @@
  * timeout.
  */
 #ifndef TCP_RTO_DEBUG
-#define TCP_RTO_DEBUG                   LWIP_DBG_ON
+#define TCP_RTO_DEBUG                   LWIP_DBG_OFF
 #endif
 
 /**
  * TCP_CWND_DEBUG: Enable debugging for TCP congestion window.
  */
 #ifndef TCP_CWND_DEBUG
-#define TCP_CWND_DEBUG                  LWIP_DBG_ON
+#define TCP_CWND_DEBUG                  LWIP_DBG_OFF
 #endif
 
 /**
  * TCP_WND_DEBUG: Enable debugging in tcp_in.c for window updating.
  */
 #ifndef TCP_WND_DEBUG
-#define TCP_WND_DEBUG                   LWIP_DBG_ON
+#define TCP_WND_DEBUG                   LWIP_DBG_OFF
 #endif
 
 /**
  * TCP_OUTPUT_DEBUG: Enable debugging in tcp_out.c output functions.
  */
 #ifndef TCP_OUTPUT_DEBUG
-#define TCP_OUTPUT_DEBUG                LWIP_DBG_ON
+#define TCP_OUTPUT_DEBUG                LWIP_DBG_OFF
 #endif
 
 /**
  * TCP_RST_DEBUG: Enable debugging for TCP with the RST message.
  */
 #ifndef TCP_RST_DEBUG
-#define TCP_RST_DEBUG                   LWIP_DBG_ON
+#define TCP_RST_DEBUG                   LWIP_DBG_OFF
 #endif
 
 /**
  * TCP_QLEN_DEBUG: Enable debugging for TCP queue lengths.
  */
 #ifndef TCP_QLEN_DEBUG
-#define TCP_QLEN_DEBUG                  LWIP_DBG_ON
+#define TCP_QLEN_DEBUG                  LWIP_DBG_OFF
 #endif
 
 /**
  * UDP_DEBUG: Enable debugging in UDP.
  */
 #ifndef UDP_DEBUG
-#define UDP_DEBUG                       LWIP_DBG_ON
+#define UDP_DEBUG                       LWIP_DBG_OFF
 #endif
 
 /**
  * TCPIP_DEBUG: Enable debugging in tcpip.c.
  */
 #ifndef TCPIP_DEBUG
-#define TCPIP_DEBUG                     LWIP_DBG_ON
+#define TCPIP_DEBUG                     LWIP_DBG_OFF
 #endif
 
 /**
  * PPP_DEBUG: Enable debugging for PPP.
  */
 #ifndef PPP_DEBUG
-#define PPP_DEBUG                       LWIP_DBG_ON
+#define PPP_DEBUG                       LWIP_DBG_OFF
 #endif
 
 /**
  * SLIP_DEBUG: Enable debugging in slipif.c.
  */
 #ifndef SLIP_DEBUG
-#define SLIP_DEBUG                      LWIP_DBG_ON
+#define SLIP_DEBUG                      LWIP_DBG_OFF
 #endif
 
 /**
  * DHCP_DEBUG: Enable debugging in dhcp.c.
  */
 #ifndef DHCP_DEBUG
-#define DHCP_DEBUG                      LWIP_DBG_ON
+#define DHCP_DEBUG                      LWIP_DBG_OFF
 #endif
 
 /**
  * AUTOIP_DEBUG: Enable debugging in autoip.c.
  */
 #ifndef AUTOIP_DEBUG
-#define AUTOIP_DEBUG                    LWIP_DBG_ON
+#define AUTOIP_DEBUG                    LWIP_DBG_OFF
 #endif
 
 /**
  * SNMP_MSG_DEBUG: Enable debugging for SNMP messages.
  */
 #ifndef SNMP_MSG_DEBUG
-#define SNMP_MSG_DEBUG                  LWIP_DBG_ON
+#define SNMP_MSG_DEBUG                  LWIP_DBG_OFF
 #endif
 
 /**
  * SNMP_MIB_DEBUG: Enable debugging for SNMP MIBs.
  */
 #ifndef SNMP_MIB_DEBUG
-#define SNMP_MIB_DEBUG                  LWIP_DBG_ON
+#define SNMP_MIB_DEBUG                  LWIP_DBG_OFF
 #endif
 
 /**
  * DNS_DEBUG: Enable debugging for DNS.
  */
 #ifndef DNS_DEBUG
-#define DNS_DEBUG                       LWIP_DBG_ON
+#define DNS_DEBUG                       LWIP_DBG_OFF
+#endif
+
+/**
+ * NAPT_DEBUG: Enable debugging for NAPT.
+ */
+#ifndef NAPT_DEBUG
+#define NAPT_DEBUG                       LWIP_DBG_OFF
 #endif
 
 #endif /* __LWIP_OPT_H__ */

@@ -38,9 +38,6 @@
 #include "c_types.h"
 #include "ets_sys.h"
 #include "osapi.h"
-
-#include "driver/log.h"
-
 #define EFAULT 14
 
 //#define LWIP_PROVIDE_ERRNO
@@ -78,8 +75,13 @@ typedef unsigned long   mem_ptr_t;
 
 #define LWIP_DEBUG 1
 
-#define LWIP_PLATFORM_DIAG(x, ...) os_printf("DIAG", x, ##__VA_ARGS__)
-#define LWIP_PLATFORM_ASSERT(x, ...) os_printf("ASSERT", x, ##__VA_ARGS__)
+#ifdef LWIP_DEBUG
+#define LWIP_PLATFORM_DIAG(x) os_printf x
+#define LWIP_PLATFORM_ASSERT(x)
+#else
+#define LWIP_PLATFORM_DIAG(x)
+#define LWIP_PLATFORM_ASSERT(x)
+#endif
 
 #define SYS_ARCH_DECL_PROTECT(x)
 #define SYS_ARCH_PROTECT(x)

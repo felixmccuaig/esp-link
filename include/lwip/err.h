@@ -74,7 +74,7 @@ typedef s8_t err_t;
 
 
 #ifdef LWIP_DEBUG
-extern const char *lwip_strerr(err_t err)ICACHE_FLASH_ATTR;
+#define lwip_strerr(x) ""
 #else
 #define lwip_strerr(x) ""
 #endif /* LWIP_DEBUG */

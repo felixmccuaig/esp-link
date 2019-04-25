@@ -105,7 +105,9 @@ PACK_STRUCT_END
 void icmp_input(struct pbuf *p, struct netif *inp)ICACHE_FLASH_ATTR;
 void icmp_dest_unreach(struct pbuf *p, enum icmp_dur_type t)ICACHE_FLASH_ATTR;
 void icmp_time_exceeded(struct pbuf *p, enum icmp_te_type t)ICACHE_FLASH_ATTR;
-
+#if IP_FORWARD
+void icmp_datagram_too_big(struct pbuf *p, u16_t mtu)ICACHE_FLASH_ATTR;
+#endif /* IP_FORWARD */
 #endif /* LWIP_ICMP */
 
 #ifdef __cplusplus

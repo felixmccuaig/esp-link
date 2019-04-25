@@ -26,8 +26,13 @@
 #define UART_APP_H
 
 #include "uart_register.h"
+
 #include "eagle_soc.h"
 #include "c_types.h"
+#include "osapi.h"
+#include "mem.h"
+#include "os_type.h"
+#include "ets_sys.h"
 
 #define UART_TX_BUFFER_SIZE 256  //Ring buffer length of tx buffer
 #define UART_RX_BUFFER_SIZE 256 //Ring buffer length of rx buffer

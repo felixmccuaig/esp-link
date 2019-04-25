@@ -220,6 +220,9 @@ struct netif {
 #if LWIP_NETIF_HWADDRHINT
   u8_t *addr_hint;
 #endif /* LWIP_NETIF_HWADDRHINT */
+#if IP_NAPT
+  u8_t napt;
+#endif
 #if ENABLE_LOOPBACK
   /* List of packets to be queued for ourselves. 指向发送给自己的数据包的pbuf*/
   struct pbuf *loop_first;//第一个
@@ -306,6 +309,7 @@ void netif_set_link_callback(struct netif *netif, netif_status_callback_fn link_
 #endif /* LWIP_IGMP */
 
 #if ENABLE_LOOPBACK
+void loopback_netif_init(netif_status_callback_fn cb)ICACHE_FLASH_ATTR;
 err_t netif_loop_output(struct netif *netif, struct pbuf *p, ip_addr_t *dest_ip)ICACHE_FLASH_ATTR;
 void netif_poll(struct netif *netif)ICACHE_FLASH_ATTR;
 #if !LWIP_NETIF_LOOPBACK_MULTITHREADING

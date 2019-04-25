@@ -22,13 +22,7 @@
  *
  */
 
-#include "ets_sys.h"
-#include "osapi.h"
 #include "driver/uart.h"
-#include "osapi.h"
-#include "driver/uart_register.h"
-#include "mem.h"
-#include "os_type.h"
 
 // UartDev is defined and initialized in rom code.
 extern UartDevice    UartDev;
@@ -293,7 +287,6 @@ uart_recvTask(os_event_t *events)
     if(events->sig == 0){
     #if  UART_BUFF_EN  
         Uart_rx_buff_enq();
-        os_printf("RECEIVED INTERRUPT\n");
     #else
         uint8 fifo_len = (READ_PERI_REG(UART_STATUS(UART0))>>UART_RXFIFO_CNT_S)&UART_RXFIFO_CNT;
         uint8 d_tmp = 0;

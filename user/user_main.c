@@ -2,10 +2,14 @@
 #include "gpio.h"
 #include "os_type.h"
 #include "mem.h"
+#include "driver/uart.h"
 
+#define log(s, ...) os_printf ("[%s:%s:%d] " s "\n", __FILE__, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+
+/*
 #include "netif/espenc.h"
 #include "lwip/netif.h"
-#include "driver/uart.h"
+
 #include "lwip/lwip_napt.h"
 
 #define IP_NAPT_MAX 512
@@ -24,13 +28,16 @@ void ICACHE_FLASH_ATTR init_enc()
         eth_if->hwaddr[0], eth_if->hwaddr[1], eth_if->hwaddr[2], eth_if->hwaddr[3], eth_if->hwaddr[4], eth_if->hwaddr[5]);
 }
 
+*/
+
 void ICACHE_FLASH_ATTR user_init()
 {
     uart_init(BIT_RATE_115200, BIT_RATE_115200);
+    log("");
     log("Successful boot");
 
-    gpio_init();
-    init_enc();
+    //gpio_init();
+    //init_enc();
 
     //ip_napt_init(IP_NAPT_MAX, IP_PORTMAP_MAX);
 

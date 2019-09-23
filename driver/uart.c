@@ -531,7 +531,6 @@ void ICACHE_FLASH_ATTR
 tx_buff_enq(char* pdata, uint16 data_len )
 {
     CLEAR_PERI_REG_MASK(UART_INT_ENA(UART0), UART_TXFIFO_EMPTY_INT_ENA);
-
     if(pTxBuffer == NULL){
         DBG1("\n\rnull, create buffer struct\n\r");
         pTxBuffer = Uart_Buf_Init(UART_TX_BUFFER_SIZE);
